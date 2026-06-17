@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comunidad — PlantaMigos</title>
+  <meta name="description"
+    content="Feed de la comunidad PlantaMigos. Intercambia plantas, dona, regala y comparte tips de cuidado.">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">PlantaMigos</a>
+    <div class="navbar-links">
+      <a href="/" class="nav-link">Mapa</a>
+      <a href="/feed.html" class="nav-link active">Comunidad</a>
+      <a href="/messages.html" class="nav-link">Mensajes</a>
+    </div>
+    <div class="navbar-auth" id="nav-auth">
+      <a href="/login.html" class="btn btn-outline btn-sm">Iniciar sesión</a>
+      <a href="/login.html?tab=register" class="btn btn-primary btn-sm">Registrarse</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="feed-main">
+      <!-- Header -->
+      <div style="margin-bottom:20px;">
+        <h1 style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;margin-bottom:4px;">
+          Comunidad
+        </h1>
+        <p style="color:var(--text-muted);font-size:0.875rem;">Intercambia, regala y aprende con tu comunidad de plantas
+        </p>
+      </div>
+
+      <!-- Filters -->
+      <div class="feed-filters">
+        <button class="filter-chip active" data-cat="all">Todo</button>
+        <button class="filter-chip" data-cat="intercambio">Intercambio</button>
+        <button class="filter-chip" data-cat="regalo">Regalo</button>
+        <button class="filter-chip" data-cat="donacion">Donación</button>
+        <button class="filter-chip" data-cat="tip">Tips</button>
+        <button class="filter-chip" data-cat="pregunta">Preguntas</button>
+      </div>
+
+      <!-- Feed -->
+      <div id="feed-container">
+        <div style="text-align:center;padding:40px;"><span class="spinner"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB: New Post -->
+  <button class="fab" id="fab-new-post" title="Nueva publicación">+</button>
+
+  <!-- MODAL: New Post -->
+  <div class="modal-overlay" id="modal-new-post">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Nueva publicación</h3>
+        <button class="modal-close" onclick="closeModal('modal-new-post')">&times;</button>
+      </div>
+      <form id="form-new-post">
+        <div class="form-group">
+          <label class="form-label">Título</label>
+          <input type="text" id="post-title" class="form-control" placeholder="ej. Doy pothos por suculenta..."
+            required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Categoría</label>
+          <select id="post-category" class="form-control">
+            <option value="intercambio">Intercambio</option>
+            <option value="regalo">Regalo</option>
+            <option value="donacion">Donación</option>
+            <option value="tip">Tip de cuidado</option>
+            <option value="pregunta">Pregunta</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea id="post-content" class="form-control" rows="4" placeholder="Cuéntanos más detalles..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Imagen (opcional)</label>
+          <input type="hidden" id="post-image-url">
+          <button type="button" id="btn-post-image" class="btn btn-outline btn-sm">Subir imagen</button>
+          <div id="post-image-preview"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Publicar</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/feed.js"></script>
+</body>
+
+</html>

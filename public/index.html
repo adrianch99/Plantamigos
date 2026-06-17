@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlantaMigos — Conecta con Amantes de las Plantas</title>
+  <meta name="description"
+    content="Encuentra amantes de las plantas en tu ciudad. Intercambia, regala y comparte tips de cuidado con tu comunidad verde local.">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+
+<body>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span class="leaf-icon"></span>PlantaMigos
+    </a>
+    <div class="navbar-links">
+      <a href="/" class="nav-link active"><span class="icon"></span><span>Mapa</span></a>
+      <a href="/feed.html" class="nav-link"><span class="icon"></span><span>Comunidad</span></a>
+      <a href="/messages.html" class="nav-link" id="nav-messages-link">
+        <span class="icon"></span><span>Mensajes</span>
+        <span class="nav-badge" id="unread-badge" style="display:none">0</span>
+      </a>
+    </div>
+    <div class="navbar-auth" id="nav-auth">
+      <a href="/login.html" class="btn btn-outline btn-sm">Iniciar sesión</a>
+      <a href="/login.html?tab=register" class="btn btn-primary btn-sm">Registrarse</a>
+    </div>
+  </nav>
+
+  <!-- MAP CONTAINER -->
+  <div class="page" style="padding-top:64px;">
+    <div id="map-container" style="position:relative;">
+      <!-- Search Box -->
+      <div class="map-search-box" id="map-search-box">
+        <input type="text" id="search-city" placeholder="Buscar ciudad o barrio...">
+        <button class="btn btn-primary btn-sm" onclick="doSearch()">Buscar</button>
+      </div>
+
+      <!-- Map -->
+      <div id="map"></div>
+
+      <!-- Legend -->
+      <div class="map-legend">
+        <h4>Leyenda</h4>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#e00303;border-radius:50%;"></div>Tú
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#4ade80;border-radius:50%;"></div>Otros planteros
+        </div>
+      </div>
+
+      <!-- My location button -->
+      <button id="btn-my-location" title="Mi ubicación"
+        style="position:absolute;bottom:80px;right:12px;z-index:500;width:40px;height:40px;border-radius:10px;border:none;background:rgba(5,13,26,0.9);border:1px solid rgba(34,197,94,0.3);color:#4ade80;font-size:1.1rem;cursor:pointer;backdrop-filter:blur(10px);">
+        📍
+      </button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/map.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Init map centered on Colombia by default
+      initMap('map', 4.711, -74.072, 13);
+      await loadMapUsers();
+      updateHomeNavbar();
+      loadUnreadCount();
+
+      // My location button
+      document.getElementById('btn-my-location').addEventListener('click', () => {
+        geolocateUser((info) => {
+          if (info) map.setView([info.lat, info.lng], 16);
+        });
+      });
+
+      // Auto-try to center on user location
+      const me = getUser();
+      if (me) {
+        geolocateUser(() => { });
+        document.getElementById('map-search-box').style.display = 'flex';
+      }
+    });
+
+    function doSearch() {
+      const q = document.getElementById('search-city').value.trim();
+      if (!q) { loadMapUsers(); return; }
+      // Try geocoding first
+      fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`)
+        .then(r => r.json())
+        .then(data => {
+          if (data[0]) map.setView([data[0].lat, data[0].lon], 14);
+          loadMapUsers(q, q);
+        });
+    }
+
+    function updateHomeNavbar() {
+      const user = getUser();
+      const navAuth = document.getElementById('nav-auth');
+      if (user && navAuth) {
+        navAuth.innerHTML = `
+          <a href="/profile.html" class="navbar-user">
+            ${avatarHTML(user, 30)}
+            <span>${user.name.split(' ')[0]}</span>
+          </a>
+          <button class="btn btn-ghost btn-sm" onclick="logout()">Salir</button>`;
+      }
+    }
+
+    async function loadUnreadCount() {
+      if (!getToken()) return;
+      try {
+        const { count } = await api.getUnread();
+        const badge = document.getElementById('unread-badge');
+        if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+      } catch { }
+    }
+  </script>
+</body>
+
+</html>

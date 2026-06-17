@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil — PlantaMigos</title>
+  <meta name="description"
+    content="Perfil de usuario en PlantaMigos. Ve las plantas, posts y contacta a este plantero.">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">PlantaMigos</a>
+    <div class="navbar-links">
+      <a href="/" class="nav-link">Mapa</a>
+      <a href="/feed.html" class="nav-link">Comunidad</a>
+      <a href="/messages.html" class="nav-link">Mensajes</a>
+    </div>
+    <div class="navbar-auth" id="nav-auth">
+      <a href="/login.html" class="btn btn-outline btn-sm">Iniciar sesión</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <!-- PROFILE HEADER -->
+    <div class="profile-header" id="profile-header-section">
+      <div class="profile-avatar-wrap" id="profile-avatar">
+        <div class="profile-avatar"
+          style="display:flex;align-items:center;justify-content:center;background:var(--bg2);font-size:2rem;">🌿</div>
+      </div>
+      <div style="flex:1;">
+        <h1 id="profile-name" style="font-size:1.5rem;font-weight:700;margin-bottom:4px;">Cargando...</h1>
+        <p class="profile-location" id="profile-location">📍 ...</p>
+        <p class="profile-bio" id="profile-bio"></p>
+        <div class="profile-stats">
+          <div class="profile-stat"><strong id="stat-plants">0</strong><span>Plantas</span></div>
+          <div class="profile-stat"><strong id="stat-posts">0</strong><span>Posts</span></div>
+          <div class="profile-stat"><strong id="profile-since">—</strong><span>Miembro desde</span></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" id="btn-edit-profile" style="display:none;">Editar perfil</button>
+          <button class="btn btn-primary btn-sm" id="btn-add-plant" style="display:none;">Agregar planta</button>
+          <button class="btn btn-primary btn-sm" id="btn-contact-user" style="display:none;">Contactar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE BODY -->
+    <div class="profile-body">
+      <!-- Plants Section -->
+      <section style="margin-bottom:32px;">
+        <div class="section-header">
+          <h2 class="section-title">Plantas</h2>
+        </div>
+        <div class="plants-grid" id="plants-grid">
+          <div style="text-align:center;padding:24px;"><span class="spinner"></span></div>
+        </div>
+      </section>
+
+      <!-- Posts Section -->
+      <section>
+        <div class="section-header">
+          <h2 class="section-title">Publicaciones</h2>
+        </div>
+        <div id="user-posts">
+          <div style="text-align:center;padding:24px;"><span class="spinner"></span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Profile -->
+  <div class="modal-overlay" id="modal-edit-profile">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Editar perfil</h3>
+        <button class="modal-close" onclick="closeModal('modal-edit-profile')">&times;</button>
+      </div>
+      <form id="form-edit-profile">
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input type="text" id="edit-name" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bio</label>
+          <textarea id="edit-bio" class="form-control" placeholder="Cuéntanos sobre ti y tus plantas..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Foto de perfil</label>
+          <input type="url" id="edit-avatar" class="form-control" placeholder="URL de imagen">
+          <button type="button" id="btn-upload-profile-pic" class="btn btn-outline btn-sm" style="margin-top:6px;">📷
+            Subir foto</button>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ciudad</label>
+            <input type="text" id="edit-city" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Barrio</label>
+            <input type="text" id="edit-neighborhood" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Calle</label>
+          <input type="text" id="edit-street" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Guardar cambios</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Plant -->
+  <div class="modal-overlay" id="modal-add-plant">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Agregar planta</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-plant')">&times;</button>
+      </div>
+      <form id="form-add-plant">
+        <div class="form-group">
+          <label class="form-label">Nombre de la planta</label>
+          <input type="text" id="plant-name" class="form-control" placeholder="ej. Pothos, Suculenta, Monstera..."
+            required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción / Tip de cuidado</label>
+          <textarea id="plant-description" class="form-control"
+            placeholder="Estado, cuidados especiales, por qué la ofreces..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Imagen</label>
+          <input type="hidden" id="plant-image-url">
+          <button type="button" id="btn-plant-image" class="btn btn-outline btn-sm">📷 Subir imagen</button>
+          <div id="plant-image-preview" style="margin-top:8px;"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tipo</label>
+            <select id="plant-type" class="form-control">
+              <option value="offer">Ofrezco</option>
+              <option value="want">Busco</option>
+              <option value="tip">Tengo (tip)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Modalidad</label>
+            <select id="plant-exchange" class="form-control">
+              <option value="intercambio">Intercambio</option>
+              <option value="regalo">Regalo</option>
+              <option value="donacion">Donación</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Agregar planta</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/profile.js"></script>
+  <script>
+    // Update navbar
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getUser();
+      const navAuth = document.getElementById('nav-auth');
+      if (user && navAuth) {
+        navAuth.innerHTML = `
+          <a href="/profile.html" class="navbar-user">
+            ${avatarHTML(user, 30)}
+            <span>${user.name.split(' ')[0]}</span>
+          </a>
+          <button class="btn btn-ghost btn-sm" onclick="logout()">Salir</button>`;
+      }
+    });
+  </script>
+</body>
+
+</html>
