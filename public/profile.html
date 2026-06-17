@@ -174,9 +174,9 @@
         navAuth.innerHTML = `
           <a href="/profile.html" class="navbar-user">
             ${avatarHTML(user, 30)}
-            <span>${user.name.split(' ')[0]}</span>
+            <span class="navbar-user-label">Ver perfil</span>
           </a>
-          <button class="btn btn-ghost btn-sm" onclick="logout()">Salir</button>`;
+          <button class="btn btn-ghost btn-sm navbar-logout" onclick="logout()">Salir</button>`;
       }
     });
   </script>

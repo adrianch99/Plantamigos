@@ -4,7 +4,7 @@ let map, userLayer, currentPopup;
 function initMap(containerId = 'map', lat = 4.711, lng = -74.0721, zoom = 13) {
   map = L.map(containerId, { zoomControl: false }).setView([lat, lng], zoom);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     subdomains: 'abcd', maxZoom: 19,
   }).addTo(map);
