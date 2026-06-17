@@ -991,7 +991,7 @@ select.form-control {
   height: 56px;
   border-radius: 50%;
   border: none;
-  background: var(--green-glow);
+  background: var(--green-pale);
   color: #000;
   font-size: 1.5rem;
   transition: var(--transition);
@@ -1370,9 +1370,9 @@ select.form-control {
     left: 0;
     right: 0;
     height: 60px;
-    background: rgba(5, 13, 26, 0.95);
+    background: var(--bg2);
     backdrop-filter: blur(20px);
-    border-top: 1px solid var(--green-border);
+    border-bottom: 1px solid var(--text-dim);
     display: flex;
     justify-content: space-around;
     align-items: center;
