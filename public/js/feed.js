@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadFeed();
   setupFeedListeners();
   updateNavbar();
+  if (typeof setBottomNavActive === 'function') setBottomNavActive();
 });
 
 async function loadFeed() {
@@ -22,14 +23,14 @@ async function loadFeed() {
     const posts = await api.getPosts(currentCategory);
     renderFeed(posts);
   } catch (err) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>${err.message}</p></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="icon"><i class="fa-solid fa-triangle-exclamation" style="color: rgb(45, 66, 54);"></i></div><p>${err.message}</p></div>`;
   }
 }
 
 function renderFeed(posts) {
   const container = document.getElementById('feed-container');
   if (!posts.length) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">🌱</div><p>Sin publicaciones aún. ¡Sé el primero!</p></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="icon"><i class="fa-solid fa-seedling" style="color: rgb(45, 66, 54);"></i></div><p>Sin publicaciones aún. ¡Sé el primero!</p></div>`;
     return;
   }
   container.innerHTML = posts.map(post => {
@@ -132,12 +133,36 @@ async function removePost(postId) {
 function updateNavbar() {
   const user = getUser();
   const navAuth = document.getElementById('nav-auth');
-  if (user && navAuth) {
-    navAuth.innerHTML = `
-      <a href="/profile.html" class="navbar-user">
-        ${avatarHTML(user, 30)}
-        <span class="navbar-user-label">Ver perfil</span>
-      </a>
-      <button class="btn btn-ghost btn-sm navbar-logout" onclick="logout()">Salir</button>`;
+  const hamburgerProfile = document.getElementById('hamburger-profile');
+  const hamburgerLogin = document.getElementById('hamburger-login');
+  const hamburgerRegister = document.getElementById('hamburger-register');
+  const hamburgerLogout = document.getElementById('hamburger-logout');
+  
+  if (user) {
+    // Usuario logueado
+    if (navAuth) {
+      navAuth.innerHTML = `
+        <a href="/profile.html" class="navbar-user">
+          ${avatarHTML(user, 30)}
+          <span class="navbar-user-label">Ver perfil</span>
+        </a>
+        <button class="btn btn-ghost btn-sm navbar-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket" style="color: rgb(45, 66, 54);"></i>Salir</button>`;
+    }
+    if (hamburgerProfile) hamburgerProfile.style.display = 'block';
+    if (hamburgerLogin) hamburgerLogin.style.display = 'none';
+    if (hamburgerRegister) hamburgerRegister.style.display = 'none';
+    if (hamburgerLogout) {
+      hamburgerLogout.style.display = 'block';
+      hamburgerLogout.onclick = logout;
+    }
+  } else {
+    // Usuario no logueado
+    if (navAuth) navAuth.innerHTML = `
+      <a href="/login.html" class="btn btn-outline btn-sm">Iniciar sesión</a>
+      <a href="/login.html?tab=register" class="btn btn-primary btn-sm">Registrarse</a>`;
+    if (hamburgerProfile) hamburgerProfile.style.display = 'none';
+    if (hamburgerLogin) hamburgerLogin.style.display = 'block';
+    if (hamburgerRegister) hamburgerRegister.style.display = 'block';
+    if (hamburgerLogout) hamburgerLogout.style.display = 'none';
   }
 }

@@ -44,18 +44,18 @@ function renderProfile() {
   if (u.avatar_url) {
     avatarEl.innerHTML = `<img src="${u.avatar_url}" class="profile-avatar" alt="${u.name}">`;
     if (isOwnProfile) {
-      avatarEl.innerHTML += `<button class="profile-edit-avatar" id="btn-edit-avatar" title="Cambiar foto">📷</button>`;
+      avatarEl.innerHTML += `<button class="profile-edit-avatar" id="btn-edit-avatar" title="Cambiar foto"><i class="fa-solid fa-camera" style="color: rgb(45, 66, 54);"></i></button>`;
     }
   } else {
     const letter = (u.name || "?")[0].toUpperCase();
     avatarEl.innerHTML = `<div class="profile-avatar" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#22c55e,#16a34a);font-size:2.5rem;font-weight:700;color:#000;">${letter}</div>`;
     if (isOwnProfile) {
-      avatarEl.innerHTML += `<button class="profile-edit-avatar" id="btn-edit-avatar" title="Cambiar foto">📷</button>`;
+      avatarEl.innerHTML += `<button class="profile-edit-avatar" id="btn-edit-avatar" title="Cambiar foto"><i class="fa-solid fa-camera" style="color: rgb(45, 66, 54);"></i></button>`;
     }
   }
   document.getElementById("profile-name").textContent = u.name;
-  document.getElementById("profile-location").textContent =
-    [u.neighborhood, u.city].filter(Boolean).join(", ") || "📍 Sin ubicación";
+  document.getElementById("profile-location").innerHTML =
+    [u.neighborhood, u.city].filter(Boolean).join(", ") || "<i class='fa-solid fa-location-dot' style='color: rgb(45, 66, 54);'></i> Sin ubicación";
   document.getElementById("profile-bio").textContent = u.bio || "";
   document.getElementById("stat-plants").textContent = u.plants?.length || 0;
   document.getElementById("stat-posts").textContent = u.posts?.length || 0;
@@ -84,7 +84,7 @@ function renderPlants() {
   const grid = document.getElementById("plants-grid");
   const plants = profileUser.plants || [];
   if (!plants.length) {
-    grid.innerHTML = `<div class="empty-state"><div class="icon">🌱</div><p>${isOwnProfile ? "¡Agrega tu primera planta!" : "Sin plantas aún"}</p></div>`;
+    grid.innerHTML = `<div class="empty-state"><div class="icon"><i class="fa-solid fa-seedling" style="color: rgb(45, 66, 54);"></i></div><p>${isOwnProfile ? "¡Agrega tu primera planta!" : "Sin plantas aún"}</p></div>`;
     return;
   }
   grid.innerHTML = plants
@@ -92,14 +92,14 @@ function renderPlants() {
       (p) => `
     <div class="plant-card" id="plant-${p.id}">
       <div class="plant-img">
-        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : "🌿"}
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : "<div style='display:flex;align-items:center;justify-content:center;height:100%;color:#4ade80;font-size:2rem;'><i class='fa-solid fa-seedling'></i></div>"}
       </div>
       <div class="plant-info">
         <div class="plant-name">${p.name}</div>
         ${p.description ? `<div class="plant-desc">${p.description}</div>` : ""}
         <div class="plant-footer">
           ${categoryBadge(p.exchange_type)}
-          ${isOwnProfile ? `<button class="plant-delete" onclick="deletePlant(${p.id})" title="Eliminar">🗑️</button>` : ""}
+          ${isOwnProfile ? `<button class="plant-delete" onclick="deletePlant(${p.id})" title="Eliminar"><i class="fa-solid fa-trash" style="color: rgb(45, 66, 54);"></i></button>` : ""}
         </div>
       </div>
     </div>`,
@@ -111,7 +111,7 @@ function renderPosts() {
   const container = document.getElementById("user-posts");
   const posts = profileUser.posts || [];
   if (!posts.length) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">📝</div><p>Sin publicaciones aún</p></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="icon"><i class="fa-solid fa-file-pen" style="color: rgb(45, 66, 54);"></i></div><p>Sin publicaciones aún</p></div>`;
     return;
   }
   container.innerHTML = posts
@@ -132,7 +132,7 @@ function renderPosts() {
       </div>
       ${p.image_url ? `<img src="${p.image_url}" class="post-image" alt="">` : ""}
       <div class="post-footer">
-        ${isOwnProfile ? `<button class="post-action" onclick="deletePost(${p.id})">Eliminar</button>` : ""}
+        ${isOwnProfile ? `<button class="post-action" onclick="deletePost(${p.id})"><i class="fa-solid fa-trash" style="color: rgb(45, 66, 54);"></i></button>` : ""}
       </div>
     </div>`,
     )
@@ -282,3 +282,4 @@ async function deletePost(postId) {
     showToast(err.message, "error");
   }
 }
+

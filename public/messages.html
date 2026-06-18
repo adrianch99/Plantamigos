@@ -6,24 +6,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mensajes — PlantaMigos</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 
 <body>
-  <div class="bg-orbs">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-  </div>
 
+  <!-- ===== NAVBAR SUPERIOR (siempre visible) ===== -->
   <nav class="navbar">
-    <a href="/" class="navbar-brand">PlantaMigos</a>
-    <div class="navbar-links">
-      <a href="/" class="nav-link">Mapa</a>
-      <a href="/feed.html" class="nav-link">Comunidad</a>
-      <a href="/messages.html" class="nav-link active">Mensajes</a>
+    <!-- Menú hamburguesa (solo móvil) -->
+    <button class="navbar-hamburger" id="navbar-hamburger" aria-label="Menú">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <a href="/" class="navbar-brand">
+      <span class="leaf-icon"><i class="fa-solid fa-seedling" style="color: rgb(45, 66, 54);"></i></span>PlantaMigos
+    </a>
+
+    <!-- Enlaces del navbar superior (se ocultan en móvil) -->
+    <div class="navbar-links" id="navbar-links">
+      <a href="/" class="nav-link active">
+        <span class="nav-link-icon"><i class="fa-solid fa-location-dot" style="color: rgb(45, 66, 54);"></i></span>
+        <span class="nav-link-label">Mapa</span>
+      </a>
+      <a href="/feed.html" class="nav-link">
+        <span class="nav-link-icon"><i class="fa-solid fa-users"></i></span>
+        <span class="nav-link-label">Comunidad</span>
+      </a>
+      <a href="/messages.html" class="nav-link" id="nav-messages-link">
+        <span class="nav-link-icon"><i class="fa-solid fa-paper-plane fa-rotate-by"
+            style="color: rgb(45, 66, 54); --fa-rotate-angle: 48deg;"></i></span>
+        <span class="nav-link-label">Mensajes</span>
+        <span class="nav-badge" id="unread-badge" style="display:none">0</span>
+      </a>
     </div>
-    <div class="navbar-auth" id="nav-auth"></div>
+
+    <div class="navbar-auth" id="nav-auth">
+      <a href="/login.html" class="btn btn-outline btn-sm">Iniciar sesión</a>
+      <a href="/login.html?tab=register" class="btn btn-primary btn-sm">Registrarse</a>
+    </div>
   </nav>
+
+  <!-- ===== NAVBAR INFERIOR (solo móvil, fijo abajo) ===== -->
+  <nav class="navbar-bottom" id="navbar-bottom">
+    <a href="/" class="nav-link-bottom active">
+      <span class="nav-link-icon"><i class="fa-solid fa-location-dot"></i></span>
+      <span class="nav-link-label">Mapa</span>
+    </a>
+    <a href="/feed.html" class="nav-link-bottom">
+      <span class="nav-link-icon"><i class="fa-solid fa-users"></i></span>
+      <span class="nav-link-label">Comunidad</span>
+    </a>
+    <a href="/messages.html" class="nav-link-bottom" id="bottom-messages-link">
+      <span class="nav-link-icon"><i class="fa-solid fa-paper-plane fa-rotate-by"
+          style="--fa-rotate-angle: 48deg;"></i></span>
+      <span class="nav-link-label">Mensajes</span>
+      <span class="nav-badge" id="bottom-unread-badge" style="display:none">0</span>
+    </a>
+  </nav>
+
+  <!-- ===== MENÚ HAMBURGUESA (desplegable) ===== -->
+  <div class="hamburger-menu" id="hamburger-menu">
+    <div class="hamburger-menu-inner">
+      <button class="hamburger-close" id="hamburger-close"><i class="fa-solid fa-xmark"></i></button>
+      <a href="/" class="hamburger-link active"><i class="fa-solid fa-location-dot"></i> Mapa</a>
+      <a href="/feed.html" class="hamburger-link"><i class="fa-solid fa-users"></i> Comunidad</a>
+      <a href="/messages.html" class="hamburger-link"><i class="fa-solid fa-paper-plane"></i> Mensajes</a>
+      <hr>
+      <a href="/profile.html" class="hamburger-link" id="hamburger-profile" style="display:none;"><i class="fa-solid fa-user"></i> Mi perfil</a>
+      <a href="/login.html" class="hamburger-link" id="hamburger-login"><i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión</a>
+      <a href="/login.html?tab=register" class="hamburger-link" id="hamburger-register"><i class="fa-solid fa-user-plus"></i> Registrarse</a>
+      <button class="hamburger-link" id="hamburger-logout"
+        style="background:none;border:none;text-align:left;width:100%;display:none;"><i
+          class="fa-solid fa-arrow-right-from-bracket"></i> Salir</button>
+    </div>
+  </div>
 
   <div class="page" style="height:100vh;overflow:hidden;">
     <div class="messages-layout">
@@ -38,7 +95,7 @@
       <!-- Chat Panel -->
       <div class="chat-panel" id="chat-panel">
         <div class="chat-empty" id="chat-empty">
-          <span style="font-size:3rem;">🌿</span>
+          <span style="font-size:4rem;"><i class="fa-solid fa-seedling" style="color: rgb(45, 66, 54);"></i></span>
           <p>Selecciona una conversación</p>
           <p style="font-size:0.75rem;color:var(--text-dim);">o contacta a alguien desde el mapa</p>
         </div>
@@ -75,6 +132,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
       if (!getToken()) { window.location.href = '/login.html'; return; }
       updateNavbar();
+      if (typeof setBottomNavActive === 'function') setBottomNavActive();
       await loadConversations();
 
       // Check URL params (coming from map/profile)
@@ -95,6 +153,34 @@
         currentChatUserId = null;
         if (pollInterval) clearInterval(pollInterval);
       });
+
+      // Hamburguesa
+      const hamburgerBtn = document.getElementById('navbar-hamburger');
+      const hamburgerMenu = document.getElementById('hamburger-menu');
+      const hamburgerClose = document.getElementById('hamburger-close');
+      
+      if (hamburgerBtn && hamburgerMenu && hamburgerClose) {
+        hamburgerBtn.addEventListener('click', () => {
+          hamburgerMenu.classList.toggle('open');
+        });
+        hamburgerClose.addEventListener('click', () => {
+          hamburgerMenu.classList.remove('open');
+        });
+        
+        // Cerrar menú cuando se hace clic en el overlay
+        hamburgerMenu.addEventListener('click', (e) => {
+          if (e.target === hamburgerMenu) {
+            hamburgerMenu.classList.remove('open');
+          }
+        });
+
+        // Cerrar menú al hacer clic en un enlace
+        document.querySelectorAll('.hamburger-link').forEach(link => {
+          link.addEventListener('click', () => {
+            hamburgerMenu.classList.remove('open');
+          });
+        });
+      }
     });
 
     async function loadConversations() {
@@ -188,15 +274,40 @@
     function updateNavbar() {
       const user = getUser();
       const navAuth = document.getElementById('nav-auth');
-      if (user && navAuth) {
-        navAuth.innerHTML = `
-          <a href="/profile.html" class="navbar-user">
-            ${avatarHTML(user, 30)}
-            <span class="navbar-user-label">Ver perfil</span>
-          </a>
-          <button class="btn btn-ghost btn-sm navbar-logout" onclick="logout()">Salir</button>`;
+      const hamburgerProfile = document.getElementById('hamburger-profile');
+      const hamburgerLogin = document.getElementById('hamburger-login');
+      const hamburgerRegister = document.getElementById('hamburger-register');
+      const hamburgerLogout = document.getElementById('hamburger-logout');
+      
+      if (user) {
+        // Usuario logueado
+        if (navAuth) {
+          navAuth.innerHTML = `
+            <a href="/profile.html" class="navbar-user">
+              ${avatarHTML(user, 30)}
+              <span class="navbar-user-label">Ver perfil</span>
+            </a>
+            <button class="btn btn-ghost btn-sm navbar-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket" style="color: rgb(45, 66, 54);"></i>Salir</button>`;
+        }
+        if (hamburgerProfile) hamburgerProfile.style.display = 'block';
+        if (hamburgerLogin) hamburgerLogin.style.display = 'none';
+        if (hamburgerRegister) hamburgerRegister.style.display = 'none';
+        if (hamburgerLogout) {
+          hamburgerLogout.style.display = 'block';
+          hamburgerLogout.onclick = logout;
+        }
+      } else {
+        // Usuario no logueado
+        if (navAuth) navAuth.innerHTML = `
+          <a href="/login.html" class="btn btn-outline btn-sm">Iniciar sesión</a>
+          <a href="/login.html?tab=register" class="btn btn-primary btn-sm">Registrarse</a>`;
+        if (hamburgerProfile) hamburgerProfile.style.display = 'none';
+        if (hamburgerLogin) hamburgerLogin.style.display = 'block';
+        if (hamburgerRegister) hamburgerRegister.style.display = 'block';
+        if (hamburgerLogout) hamburgerLogout.style.display = 'none';
       }
     }
+
   </script>
 </body>
 

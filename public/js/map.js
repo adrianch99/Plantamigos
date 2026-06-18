@@ -41,23 +41,23 @@ function createPopupHTML(user) {
     ? `<img src="${user.avatar_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #22c55e;">`
     : `<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;">${(user.name||'?')[0].toUpperCase()}</div>`;
   const contactBtn = isMe
-    ? `<a href="/profile.html" style="display:block;text-align:center;padding:7px;background:rgba(34,197,94,0.2);border-radius:8px;color:#4ade80;font-size:0.78rem;font-weight:600;">Mi perfil</a>`
-    : `<button onclick="openChatWith(${user.id},'${user.name}')" style="display:block;width:100%;padding:7px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:8px;color:#000;font-size:0.78rem;font-weight:700;cursor:pointer;">Contactar</button>`;
+    ? `<a href="/profile.html" style="display:block;text-align:center;padding:7px;background:rgba(34,197,94,0.2);border-radius:8px;color:#2D4236;font-size:0.78rem;font-weight:600;">Mi perfil</a>`
+    : `<button onclick="openChatWith(${user.id},'${user.name}')" style="display:block;width:100%;padding:7px;background:rgba(34, 197, 94, 0.25);border:none;border-radius:8px;color:#000;font-size:0.78rem;font-weight:700;cursor:pointer;">Contactar</button>`;
   return `
     <div class="popup-card" style="font-family:'Inter',sans-serif;color:#f0fdf4;">
       <div class="popup-user">
         ${avatarHtml}
         <div>
           <div class="popup-name" style="color:#2D4236;">${user.name}</div>
-          <div class="popup-location" style="font-size:0.72rem;color:#64748b;">📍 ${user.neighborhood || user.city || 'Sin ubicación'}</div>
+          <div class="popup-location" style="font-size:0.72rem;color:#64748b;"><i class="fa-solid fa-location-dot" style="color: rgb(45, 66, 54);"></i> ${user.neighborhood || user.city || 'Sin ubicación'}</div>
         </div>
       </div>
       <div style="display:flex;gap:10px;margin-bottom:10px;">
-        <span style="font-size:0.75rem;color:#4ade80;"> ${user.plant_count || 0} plantas</span>
+        <span style="font-size:0.75rem;color:#2D4236;"> ${user.plant_count || 0} plantas</span>
         ${user.bio ? `<span style="font-size:0.72rem;color:#94a3b8;">${user.bio.substring(0,40)}${user.bio.length>40?'...':''}</span>` : ''}
       </div>
       <div style="display:flex;gap:6px;flex-direction:column;">
-        <a href="/profile.html?id=${user.id}" style="display:block;text-align:center;padding:6px;border:1px solid rgba(34,197,94,0.3);border-radius:8px;color:#4ade80;font-size:0.78rem;font-weight:600;">Ver perfil</a>
+        <a href="/profile.html?id=${user.id}" style="display:block;text-align:center;padding:6px;border:1px solid rgba(34,197,94,0.3);border-radius:8px;color:#2D4236;font-size:0.78rem;font-weight:600;">Ver perfil</a>
         ${contactBtn}
       </div>
     </div>`;

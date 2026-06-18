@@ -120,3 +120,37 @@ function openCloudinaryWidget(cloudName, uploadPreset, onSuccess) {
     if (!err && result.event === 'success') onSuccess(result.info.secure_url);
   });
 }
+
+// ===== NAV HELPERS =====
+// Set the active class on the bottom navbar based on the current pathname
+function setBottomNavActive() {
+  const links = document.querySelectorAll('.nav-link-bottom');
+  if (!links || !links.length) return;
+  links.forEach(l => l.classList.remove('active'));
+  const path = (location.pathname || '/').replace(/\/$/, '') || '/';
+  let matched = false;
+  links.forEach(l => {
+    try {
+      const hrefPath = new URL(l.href).pathname.replace(/\/$/, '') || '/';
+      if (hrefPath === path) {
+        l.classList.add('active');
+        matched = true;
+      }
+    } catch (e) { /* ignore invalid hrefs */ }
+  });
+  if (!matched) {
+    // Fallback: if we're on root, mark the first link; otherwise try to match by contains
+    if (path === '/' || path === '') {
+      const first = links[0];
+      if (first) first.classList.add('active');
+    } else {
+      // try contains match (e.g., /feed.html -> /feed.html#something)
+      links.forEach(l => {
+        try {
+          const hrefPath = new URL(l.href).pathname;
+          if (path.indexOf(hrefPath.replace(/\/$/, '')) === 0) l.classList.add('active');
+        } catch (e) {}
+      });
+    }
+  }
+}
