@@ -21,8 +21,21 @@ async function apiFetch(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(BASE + path, { ...options, headers });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Error en la solicitud');
+  const content = await res.text();
+  let data;
+  try {
+    data = content ? JSON.parse(content) : {};
+  } catch {
+    data = { error: content.trim() || 'Respuesta inválida del servidor' };
+  }
+  if (!res.ok) {
+    const message = data.error || `Error ${res.status} ${res.statusText}`;
+    const err = new Error(message);
+    err.status = res.status;
+    err.url = BASE + path;
+    err.body = content;
+    throw err;
+  }
   return data;
 }
 
@@ -39,9 +52,12 @@ const api = {
   deletePlant: (uid,pid)=> apiFetch(`/users/${uid}/plants/${pid}`, { method:'DELETE' }),
 
   // Posts
-  getPosts:   (cat)  => apiFetch(`/posts${cat && cat!=='all' ? `?category=${cat}` : ''}`),
-  createPost: (body) => apiFetch('/posts', { method:'POST', body:JSON.stringify(body) }),
-  deletePost: (id)   => apiFetch(`/posts/${id}`, { method:'DELETE' }),
+  getPosts:            (cat)  => apiFetch(`/posts${cat && cat!=='all' ? `?category=${cat}` : ''}`),
+  createPost:          (body) => apiFetch('/posts', { method:'POST', body:JSON.stringify(body) }),
+  deletePost:          (id)   => apiFetch(`/posts/${id}`, { method:'DELETE' }),
+  getPostInteractions: (id)   => apiFetch(`/posts/${id}/interactions`),
+  togglePostLike:      (id)   => apiFetch(`/posts/${id}/like`, { method:'POST' }),
+  addPostComment:      (id, content) => apiFetch(`/posts/${id}/comment`, { method:'POST', body: JSON.stringify({ content }) }),
 
   // Messages
   getConversations: ()      => apiFetch('/messages/conversations'),

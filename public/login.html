@@ -30,8 +30,8 @@
 
         <!-- Tabs -->
         <div class="auth-tabs">
-          <button class="auth-tab" data-tab="login-section" id="tab-login">Iniciar sesión</button>
-          <button class="auth-tab active" data-tab="register-section" id="tab-register">Registrarse</button>
+          <button type="button" class="auth-tab" data-tab="login-section" id="tab-login">Iniciar sesión</button>
+          <button type="button" class="auth-tab active" data-tab="register-section" id="tab-register">Registrarse</button>
         </div>
 
         <!-- LOGIN SECTION -->
@@ -104,7 +104,14 @@
         setTimeout(() => miniMap.invalidateSize(), 150);
       }
     }
-    // Auto-switch if coming from register link
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab.replace('-section', '');
+        switchTab(target);
+      });
+    });
+
+    // Auto-switch if coming from register or login link
     const params = new URLSearchParams(location.search);
     if (params.get('tab') === 'register') switchTab('register');
     else if (params.get('tab') === 'login') switchTab('login');

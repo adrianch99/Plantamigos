@@ -53,10 +53,23 @@ function renderFeed(posts) {
           ${post.content ? `<div class="post-content">${post.content}</div>` : ''}
         </div>
         ${post.image_url ? `<img src="${post.image_url}" class="post-image" alt="imagen del post">` : ''}
-        <div class="post-footer">
+        <div class="post-actions">
+          <button type="button" class="post-action post-like-btn${post.likedByUser ? ' liked' : ''}" data-post-id="${post.id}">
+            <i class="fa-solid fa-heart"></i> <span id="like-count-${post.id}">${post.likes || 0}</span>
+          </button>
+          <button type="button" class="post-action post-comment-toggle" data-post-id="${post.id}">
+            <i class="fa-solid fa-comment"></i> <span id="comment-count-${post.id}">${post.comments || 0}</span>
+          </button>
           ${currentUser && !isOwn ? `<button class="post-action" onclick="contactPost(${post.user_id},'${post.user_name}')">Contactar</button>` : ''}
           <a href="/profile.html?id=${post.user_id}" class="post-action">Ver perfil</a>
           ${isOwn ? `<button class="post-action" style="color:#ef4444;" onclick="removePost(${post.id})">Eliminar</button>` : ''}
+        </div>
+        <div class="post-comments" id="comments-panel-${post.id}" style="display:none;">
+          <div class="comments-list" id="comments-list-${post.id}"></div>
+          <form class="post-comment-form" data-post-id="${post.id}">
+            <textarea name="comment" class="form-control" placeholder="Escribe un comentario..." required></textarea>
+            <button type="submit" class="btn btn-outline btn-sm">Comentar</button>
+          </form>
         </div>
       </div>`;
   }).join('');
@@ -110,10 +123,98 @@ function setupFeedListeners() {
     finally { btn.disabled = false; btn.textContent = 'Publicar'; }
   });
 
+  const feedContainer = document.getElementById('feed-container');
+  if (feedContainer) {
+    feedContainer.addEventListener('click', async (e) => {
+      const likeBtn = e.target.closest('.post-like-btn');
+      const commentToggle = e.target.closest('.post-comment-toggle');
+      if (likeBtn) {
+        const postId = likeBtn.dataset.postId;
+        if (!getToken()) { window.location.href = '/login.html'; return; }
+        try {
+          const result = await api.togglePostLike(postId);
+          const countEl = document.getElementById(`like-count-${postId}`);
+          const current = parseInt(countEl?.textContent || '0', 10);
+          if (countEl) countEl.textContent = result.liked ? current + 1 : Math.max(current - 1, 0);
+          likeBtn.classList.toggle('liked', result.liked);
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      }
+      if (commentToggle) {
+        const postId = commentToggle.dataset.postId;
+        const panel = document.getElementById(`comments-panel-${postId}`);
+        if (panel) {
+          panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+          if (panel.style.display === 'block') await loadPostInteractions(postId);
+        }
+      }
+    });
+
+    feedContainer.addEventListener('submit', async (e) => {
+      const form = e.target.closest('.post-comment-form');
+      if (!form) return;
+      e.preventDefault();
+      const postId = form.dataset.postId;
+      const textarea = form.querySelector('textarea[name="comment"]');
+      const content = textarea.value.trim();
+      if (!content) return;
+      if (!getToken()) { window.location.href = '/login.html'; return; }
+      const btn = form.querySelector('[type=submit]');
+      btn.disabled = true;
+      try {
+        const comment = await api.addPostComment(postId, content);
+        textarea.value = '';
+        const list = document.getElementById(`comments-list-${postId}`);
+        if (list) {
+          list.insertAdjacentHTML('beforeend', renderComment(comment));
+        }
+        const commentCount = document.getElementById(`comment-count-${postId}`);
+        if (commentCount) commentCount.textContent = String(parseInt(commentCount.textContent || '0', 10) + 1);
+        showToast('Comentario agregado');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
   // Close modals
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
   });
+}
+
+function renderComment(comment) {
+  return `
+    <div class="comment-item">
+      ${avatarHTML({ avatar_url: comment.user_avatar, name: comment.user_name }, 28)}
+      <div class="comment-content">
+        <strong>${comment.user_name}</strong>
+        <div>${comment.content}</div>
+        <div class="comment-time">${timeAgo(comment.created_at)}</div>
+      </div>
+    </div>`;
+}
+
+async function loadPostInteractions(postId) {
+  try {
+    const data = await api.getPostInteractions(postId);
+    const likeCount = document.getElementById(`like-count-${postId}`);
+    const commentCount = document.getElementById(`comment-count-${postId}`);
+    const likeBtn = document.querySelector(`.post-like-btn[data-post-id="${postId}"]`);
+    const list = document.getElementById(`comments-list-${postId}`);
+    if (likeCount) likeCount.textContent = String(data.likes);
+    if (commentCount) commentCount.textContent = String(data.comments.length);
+    if (likeBtn) likeBtn.classList.toggle('liked', data.likedByUser);
+    if (list) {
+      list.innerHTML = data.comments.map(c => renderComment(c)).join('') || '<div class="comment-empty">Sé el primero en comentar.</div>';
+    }
+  } catch (err) {
+    console.error('Error cargando interacciones:', err);
+    showToast(err.message || 'No se pudieron cargar los comentarios.', 'error');
+  }
 }
 
 function contactPost(userId, userName) {

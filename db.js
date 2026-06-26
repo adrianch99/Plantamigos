@@ -47,6 +47,22 @@ async function initDB() {
         created_at TIMESTAMP DEFAULT NOW()
       );
 
+      CREATE TABLE IF NOT EXISTS post_likes (
+        id SERIAL PRIMARY KEY,
+        user_id INT REFERENCES users(id) ON DELETE CASCADE,
+        post_id INT REFERENCES posts(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(user_id, post_id)
+      );
+
+      CREATE TABLE IF NOT EXISTS post_comments (
+        id SERIAL PRIMARY KEY,
+        user_id INT REFERENCES users(id) ON DELETE CASCADE,
+        post_id INT REFERENCES posts(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+
       CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
         from_user INT REFERENCES users(id) ON DELETE CASCADE,

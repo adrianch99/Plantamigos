@@ -1011,6 +1011,64 @@ select.form-control {
   background: var(--green-glow);
   color: var(--green);
 }
+.post-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 0 16px 16px;
+}
+.post-like-btn.liked,
+.post-like-btn.liked:hover {
+  color: #ef4444;
+}
+.post-comment-toggle {
+  white-space: nowrap;
+}
+.post-comments {
+  margin: 0 16px 16px;
+  border-top: 1px solid rgba(45, 66, 54, 0.12);
+  padding-top: 12px;
+}
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.comment-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: rgba(255,255,255,0.35);
+  border-radius: 12px;
+  padding: 10px;
+}
+.comment-content {
+  flex: 1;
+}
+.comment-content strong {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+.comment-time {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+.comment-empty {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+}
+.post-comment-form {
+  display: grid;
+  gap: 8px;
+}
+.post-comment-form textarea {
+  min-height: 70px;
+}
 .fab {
   position: fixed;
   bottom: 28px;
@@ -1155,7 +1213,7 @@ select.form-control {
 .auth-logo h1 {
   font-family: 'Playfair Display', serif;
   font-size: 2rem;
-  color: var(--green);
+  color: var(--text);
 }
 .auth-logo p {
   color: var(--text);
