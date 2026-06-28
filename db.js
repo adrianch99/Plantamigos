@@ -1,8 +1,8 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false, sslmode: "verify-full" }
 });
 
 async function initDB() {
@@ -72,7 +72,7 @@ async function initDB() {
         created_at TIMESTAMP DEFAULT NOW()
       );
     `);
-    console.log('✅ Base de datos inicializada correctamente');
+    console.log("✅ Base de datos inicializada correctamente");
   } finally {
     client.release();
   }

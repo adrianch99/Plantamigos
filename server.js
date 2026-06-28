@@ -22,6 +22,12 @@ app.get('/api/config', (req, res) => {
   });
 });
 
+// Endpoint para mantener la app despierta
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Endpoint para servir index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
