@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>PlantaMigos · Conecta con tu ciudad verde</title>
+    <!-- Font Awesome para los íconos (similar al diseño) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* --- RESET Y ESTILOS BASE --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f9f4; /* Fondo muy suave verdoso */
+            color: #1e3a2f;
+            line-height: 1.5;
+            padding: 0 0 2rem 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* --- BOTÓN FLOTANTE WHATSAPP / MENSAJE (opcional pero atractivo) --- */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50px;
+            padding: 12px 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .whatsapp-float i {
+            font-size: 1.4rem;
+        }
+        @media (max-width: 480px) {
+            .whatsapp-float span { display: none; }
+            .whatsapp-float { border-radius: 50%; padding: 14px; }
+        }
+
+        /* --- HEADER / HERO --- */
+        .hero {
+            background: linear-gradient(145deg, #1e4d3a 0%, #2b6b4f 100%);
+            color: white;
+            padding: 2.5rem 0 3.5rem 0;
+            border-radius: 0 0 40px 40px;
+            margin-bottom: 2rem;
+            box-shadow: 0 6px 20px rgba(30, 74, 58, 0.25);
+            text-align: center;
+        }
+
+        .hero-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .hero-logo i {
+            background: #ffd966;
+            color: #1e4d3a;
+            padding: 12px;
+            border-radius: 20px;
+            font-size: 2rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .hero h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 0.75rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .hero h1 span {
+            background: #ffd966;
+            color: #1e3a2f;
+            padding: 0 12px;
+            border-radius: 30px;
+            display: inline-block;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 500px;
+            margin: 0 auto 2rem auto;
+            font-weight: 400;
+        }
+
+        .btn-hero {
+            background: #ffd966;
+            color: #1e3a2f;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 60px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 6px 0 #b38f3a;
+            transition: all 0.1s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-hero:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b38f3a;
+        }
+        .btn-hero i {
+            font-size: 1.6rem;
+        }
+
+        .stats-mini {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            font-size: 0.95rem;
+            opacity: 0.85;
+            flex-wrap: wrap;
+        }
+        .stats-mini i {
+            margin-right: 6px;
+        }
+
+        /* --- SECCIÓN: ¿CÓMO FUNCIONA? (3 PASOS) --- */
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 2.5rem 0 1rem 0;
+            color: #1e3a2f;
+        }
+        .section-title i {
+            color: #2b6b4f;
+            margin-right: 10px;
+        }
+        .section-sub {
+            text-align: center;
+            color: #3d5a4b;
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        .pasos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0 2.5rem 0;
+        }
+
+        .paso-card {
+            background: white;
+            border-radius: 28px;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 8px 24px rgba(0, 40, 20, 0.08);
+            text-align: center;
+            border: 1px solid rgba(43, 107, 79, 0.1);
+            transition: transform 0.2s;
+        }
+        .paso-card:hover {
+            transform: translateY(-6px);
+        }
+        .paso-icon {
+            background: #e6f3ea;
+            width: 80px;
+            height: 80px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem auto;
+            font-size: 2.6rem;
+            color: #1e4d3a;
+        }
+        .paso-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            color: #1e3a2f;
+        }
+        .paso-card p {
+            color: #3d5a4b;
+            font-size: 1rem;
+        }
+
+        /* --- FEATURES / FUNCIONALIDADES (estilo similar a las capturas) --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0 2.5rem 0;
+        }
+
+        .feature-item {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem 0.8rem;
+            text-align: center;
+            border: 1px solid #deecdd;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+        }
+        .feature-item i {
+            font-size: 2.2rem;
+            color: #1e4d3a;
+            background: #edf6ef;
+            padding: 14px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+        .feature-item h4 {
+            font-weight: 600;
+            color: #1e3a2f;
+            font-size: 1rem;
+        }
+        .feature-item p {
+            font-size: 0.8rem;
+            color: #4b6b5a;
+            margin-top: 4px;
+        }
+
+        /* --- PREVIEW / MOCKUP (simulando lo que ven en las capturas) --- */
+        .mockup-row {
+            background: white;
+            border-radius: 36px;
+            padding: 2rem 1.5rem;
+            margin: 2.5rem 0;
+            box-shadow: 0 12px 30px rgba(0, 40, 20, 0.06);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 2rem;
+            border: 1px solid #d4e8d3;
+        }
+        .mockup-text {
+            flex: 1 1 240px;
+        }
+        .mockup-text h3 {
+            font-size: 1.7rem;
+            margin-bottom: 0.5rem;
+        }
+        .mockup-text p {
+            color: #2d4f3e;
+        }
+
+        .mockup-badges {
+            flex: 1 1 200px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+        }
+        .mockup-badge {
+            background: #f4f9f4;
+            border-radius: 60px;
+            padding: 8px 20px 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 1px solid #c9dfc7;
+        }
+        .mockup-badge i {
+            color: #1e4d3a;
+            font-size: 1.2rem;
+        }
+
+        /* --- ZONA DE REGISTRO (CTA FINAL) --- */
+        .cta-final {
+            background: #1e4d3a;
+            border-radius: 40px;
+            padding: 2.5rem 1.8rem;
+            margin: 3rem 0 1rem 0;
+            text-align: center;
+            color: white;
+            box-shadow: 0 10px 20px rgba(30, 74, 58, 0.3);
+        }
+        .cta-final h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+        .cta-final p {
+            font-size: 1.1rem;
+            opacity: 0.85;
+            margin: 0.5rem 0 1.5rem 0;
+        }
+        .btn-registro {
+            background: #ffd966;
+            color: #1e3a2f;
+            padding: 1rem 3rem;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1.4rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            border: none;
+            box-shadow: 0 6px 0 #b38f3a;
+            transition: all 0.1s ease;
+        }
+        .btn-registro:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b38f3a;
+        }
+        .btn-registro i {
+            font-size: 1.6rem;
+        }
+        .cta-final small {
+            display: block;
+            margin-top: 1.2rem;
+            opacity: 0.6;
+            font-size: 0.85rem;
+        }
+
+        /* --- FOOTER SIMPLE --- */
+        .footer {
+            text-align: center;
+            color: #4b6b5a;
+            padding: 2rem 0 0.5rem 0;
+            font-size: 0.85rem;
+            border-top: 1px solid #d0e3ce;
+            margin-top: 2.5rem;
+        }
+        .footer i {
+            color: #b88b3a;
+        }
+
+        /* --- RESPONSIVE (para móvil se ve igual que las capturas) --- */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            .hero p { font-size: 1rem; }
+            .btn-hero { padding: 0.8rem 2rem; font-size: 1.1rem; }
+            .section-title { font-size: 1.5rem; }
+            .pasos-grid { gap: 1rem; }
+            .cta-final h2 { font-size: 1.8rem; }
+            .btn-registro { font-size: 1.1rem; padding: 0.8rem 2rem; }
+            .mockup-row { flex-direction: column; text-align: center; }
+            .whatsapp-float {display: none;}
+        }
+
+        /* Efecto sutil de aparición */
+        .fade-in {
+            animation: fadeUp 0.6s ease forwards;
+            opacity: 0;
+        }
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+
+<!-- Botón flotante (simula un enlace directo a mensajes, pero llevará al registro) -->
+<a href="https://plantamigos.onrender.com" class="whatsapp-float" target="_blank">
+    <i class="fas fa-leaf"></i>
+    <span>Únete</span>
+</a>
+
+<!-- HERO -->
+<header class="hero">
+    <div class="container">
+        <div class="hero-logo">
+            <i class="fas fa-seedling"></i>
+            <span>PlantaMigos</span>
+        </div>
+        <h1>La comunidad <span>verde</span> de tu ciudad</h1>
+        <p>Conecta con amantes de las plantas cerca de ti. Intercambia, aprende y llena tu hogar de vida.</p>
+        
+        <a href="https://plantamigos.onrender.com" target="_blank" class="btn-hero">
+            <i class="fas fa-eye"></i>Hecha un vistazo a Plantamigos
+        </a>
+
+        <div class="stats-mini">
+            <span><i class="fas fa-users"></i> +50 PlantaMigos</span>
+            <span><i class="fas fa-seedling"></i> Plantas compartidas</span>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- SECCIÓN: ¿CÓMO FUNCIONA? (basado en las funciones de la app) -->
+    <h2 class="section-title fade-in"><i class="fas fa-compass"></i> Así funciona PlantaMigos</h2>
+    <p class="section-sub fade-in">Descubre, conecta y comparte en 3 pasos simples</p>
+
+    <div class="pasos-grid">
+        <div class="paso-card fade-in delay-1">
+            <div class="paso-icon"><i class="fas fa-map-marked-alt"></i></div>
+            <h3>1. Explora el mapa</h3>
+            <p>Busca por ciudad o barrio (ej. Barranquilla) y encuentra otros PlantaMigos cerca de ti con sus plantas.</p>
+        </div>
+        <div class="paso-card fade-in delay-2">
+            <div class="paso-icon"><i class="fas fa-hand-holding-heart"></i></div>
+            <h3>2. Intercambia o regala</h3>
+            <p>Publica plantas en <strong>Intercambio, Regalo o Donación</strong>. También haz preguntas y comparte tips.</p>
+        </div>
+        <div class="paso-card fade-in delay-3">
+            <div class="paso-icon"><i class="fas fa-comment-dots"></i></div>
+            <h3>3. Chatea y haz amigos</h3>
+            <p>Mensajea con otros usuarios, comenta sus posts y construye tu red de amantes de las plantas.</p>
+        </div>
+    </div>
+
+    <!-- FEATURES (íconos estilo app) -->
+    <div class="features-grid">
+        <div class="feature-item fade-in">
+            <i class="fas fa-seedling"></i>
+            <h4>Mi perfil</h4>
+            <p>Sube tus plantas, ubicación y reputación</p>
+        </div>
+        <div class="feature-item fade-in">
+            <i class="fas fa-newspaper"></i>
+            <h4>Muro social</h4>
+            <p>Posts con fotos, preguntas y reacciones</p>
+        </div>
+        <div class="feature-item fade-in">
+            <i class="fas fa-comment"></i>
+            <h4>Mensajes</h4>
+            <p>Chat directo con otros PlantaMigos</p>
+        </div>
+        <div class="feature-item fade-in">
+            <i class="fas fa-tag"></i>
+            <h4>Filtros</h4>
+            <p>Todo · Intercambio · Regalo · Tips</p>
+        </div>
+    </div>
+
+    <!-- MOCKUP / RESALTADOR (simula lo que ven en las capturas) -->
+    <div class="mockup-row fade-in">
+        <div class="mockup-text">
+            <h3><i class="fas fa-mobile-alt" style="color:#1e4d3a;"></i> Mira lo que encontrarás</h3>
+            <p>Publicaciones como <strong>“¿Qué planta es?”</strong>, mapa interactivo, lista de conversaciones y perfil con tus plantas.</p>
+        </div>
+        <div class="mockup-badges">
+            <span class="mockup-badge"><i class="fas fa-image"></i> Fotos</span>
+            <span class="mockup-badge"><i class="fas fa-heart"></i> Reacciones</span>
+            <span class="mockup-badge"><i class="fas fa-user-friends"></i> Comunidad</span>
+            <span class="mockup-badge"><i class="fas fa-location-dot"></i> Local</span>
+        </div>
+    </div>
+
+    <!-- ZONA FINAL DE REGISTRO (el CTA fuerte) -->
+    <div class="cta-final fade-in">
+        <h2>Únete a la comunidad</h2>
+        <p>Regístrate ahora y empieza a conectar con otros amantes de las plantas en tu ciudad.</p>
+        <a href="https://plantamigos.onrender.com" target="_blank" class="btn-registro">
+            <i class="fas fa-leaf"></i> Registrarme gratis
+        </a>
+        <small>✓ Es gratis · ✓ Sin spam · ✓ Solo amantes de las plantas</small>
+    </div>
+
+</main>
+
+<footer class="container footer">
+    <p><i class="fas fa-seedling"></i> PlantaMigos · Tu comunidad verde <i class="fas fa-seedling"></i></p>
+    <p style="margin-top: 6px; font-size: 0.75rem;">Hecho con <i class="fas fa-heart" style="color:#b88b3a;"></i> para los PlantaMigos de alredeor del mundo.</p>
+</footer>
+
+</body>
+</html>
