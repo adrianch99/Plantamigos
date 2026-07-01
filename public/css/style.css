@@ -253,6 +253,40 @@ img {
   opacity: 0.3;
 }
 
+/* Social Media Section in Hamburger Menu */
+.hamburger-social-section {
+  padding: 16px 8px 12px;
+}
+.hamburger-social-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+.hamburger-social-links {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+}
+.hamburger-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--green-glow);
+  color: var(--text);
+  transition: var(--transition);
+  font-size: 1rem;
+}
+.hamburger-social-link:hover {
+  background: rgba(34, 197, 94, 0.35);
+  transform: translateY(-2px);
+}
+
 /* ===== NAVBAR INFERIOR (solo móvil) ===== */
 .navbar-bottom {
   display: none;
@@ -536,7 +570,7 @@ select.form-control {
   transform: translateX(0);
 }
 .toast-success {
-  background: #052e16;
+  background: var(--bg2);
   border: 1px solid rgba(34, 197, 94, 0.4);
   color: var(--green);
 }
@@ -845,37 +879,43 @@ select.form-control {
 }
 .plants-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
 }
 .plant-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  background: var(--bg2);
+  border: 1px solid rgba(45, 66, 54, 0.12);
+  border-radius: var(--radius);
   overflow: hidden;
   transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 .plant-card:hover {
   border-color: var(--green);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 .plant-img {
   width: 100%;
-  height: 130px;
-  object-fit: cover;
-  background: var(--bg3);
+  height: 220px;
+  background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(255,255,255,0.4));
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.5rem;
+  overflow: hidden;
+  padding: 10px;
 }
 .plant-img img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: rgba(255,255,255,0.55);
+  border-radius: 12px;
+  cursor: pointer;
 }
 .plant-info {
-  padding: 12px;
+  padding: 14px 14px 12px;
 }
 .plant-name {
   font-weight: 600;
@@ -985,8 +1025,97 @@ select.form-control {
 }
 .post-image {
   width: 100%;
-  max-height: 300px;
-  object-fit: cover;
+  max-height: 500px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: var(--transition);
+  background: rgba(0, 0, 0, 0.02);
+}
+.post-image:hover {
+  transform: scale(1.01);
+  opacity: 0.9;
+}
+
+/* Image Fullscreen Modal */
+.image-fullscreen-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition);
+  backdrop-filter: blur(4px);
+}
+.image-fullscreen-modal.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.image-fullscreen-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-fullscreen-img {
+  max-width: 100vw;
+  max-height: 90vh;
+  object-fit: contain;
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.image-fullscreen-left,
+.image-fullscreen-right {
+  position: absolute;
+  top: 5%;
+  transform: translateY(-50%);
+  z-index: 3001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.image-fullscreen-left {
+  left: 10px;
+}
+.image-fullscreen-right {
+  right: 10px;
+}
+.image-fullscreen-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: var(--transition);
+  backdrop-filter: blur(8px);
+}
+.image-fullscreen-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+.image-fullscreen-btn i {
+  pointer-events: none;
 }
 .post-footer {
   display: flex;
@@ -1404,7 +1533,7 @@ select.form-control {
     gap: 6px;    
   }
   .navbar-auth {
-    display: none !important;
+    display: none;
   }
   .navbar-user {
     padding: 6px 8px;

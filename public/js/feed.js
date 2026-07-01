@@ -52,7 +52,7 @@ function renderFeed(posts) {
           <div class="post-title">${post.title}</div>
           ${post.content ? `<div class="post-content">${post.content}</div>` : ''}
         </div>
-        ${post.image_url ? `<img src="${post.image_url}" class="post-image" alt="imagen del post">` : ''}
+        ${post.image_url ? `<img src="${post.image_url}" class="post-image" alt="imagen del post" data-image-url="${post.image_url}">` : ''}
         <div class="post-actions">
           <button type="button" class="post-action post-like-btn${post.likedByUser ? ' liked' : ''}" data-post-id="${post.id}">
             <i class="fa-solid fa-heart"></i> <span id="like-count-${post.id}">${post.likes || 0}</span>
@@ -76,6 +76,50 @@ function renderFeed(posts) {
 }
 
 function setupFeedListeners() {
+  // Image fullscreen listeners
+  const fullscreenModal = document.getElementById('image-fullscreen-modal');
+  const fullscreenImage = document.getElementById('fullscreen-image');
+  const closeBtn = document.getElementById('image-fullscreen-close');
+  const downloadBtn = document.getElementById('image-fullscreen-download');
+  
+  if (fullscreenModal && closeBtn && downloadBtn) {
+    closeBtn.addEventListener('click', () => {
+      fullscreenModal.classList.remove('open');
+    });
+    
+    fullscreenModal.addEventListener('click', (e) => {
+      if (e.target === fullscreenModal) {
+        fullscreenModal.classList.remove('open');
+      }
+    });
+    
+    downloadBtn.addEventListener('click', async () => {
+      const imageUrl = fullscreenImage.src;
+      if (!imageUrl) return;
+      try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `imagen-plantas-${new Date().getTime()}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (err) {
+        showToast('Error al descargar la imagen', 'error');
+      }
+    });
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && fullscreenModal.classList.contains('open')) {
+        fullscreenModal.classList.remove('open');
+      }
+    });
+  }
+  
   // Category filters
   document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -126,8 +170,22 @@ function setupFeedListeners() {
   const feedContainer = document.getElementById('feed-container');
   if (feedContainer) {
     feedContainer.addEventListener('click', async (e) => {
+      const postImage = e.target.closest('.post-image');
       const likeBtn = e.target.closest('.post-like-btn');
       const commentToggle = e.target.closest('.post-comment-toggle');
+      
+      if (postImage) {
+        const imageUrl = postImage.dataset.imageUrl;
+        if (imageUrl) {
+          const fullscreenModal = document.getElementById('image-fullscreen-modal');
+          const fullscreenImage = document.getElementById('fullscreen-image');
+          if (fullscreenModal && fullscreenImage) {
+            fullscreenImage.src = imageUrl;
+            fullscreenModal.classList.add('open');
+          }
+        }
+        return;
+      }
       if (likeBtn) {
         const postId = likeBtn.dataset.postId;
         if (!getToken()) { window.location.href = '/login.html'; return; }

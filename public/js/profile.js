@@ -5,6 +5,7 @@ const UPLOAD_PRESET = "plantamigos_unsigned";
 let profileUser = null,
   currentUser = null,
   isOwnProfile = false;
+const postInteractionsCache = new Map();
 
 document.addEventListener("DOMContentLoaded", async () => {
   currentUser = getUser();
@@ -92,7 +93,7 @@ function renderPlants() {
       (p) => `
     <div class="plant-card" id="plant-${p.id}">
       <div class="plant-img">
-        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : "<div style='display:flex;align-items:center;justify-content:center;height:100%;color:#4ade80;font-size:2rem;'><i class='fa-solid fa-seedling'></i></div>"}
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" class="plant-image" data-image-url="${p.image_url}">` : "<div style='display:flex;align-items:center;justify-content:center;height:100%;color:#4ade80;font-size:2rem;'><i class='fa-solid fa-seedling'></i></div>"}
       </div>
       <div class="plant-info">
         <div class="plant-name">${p.name}</div>
@@ -117,7 +118,7 @@ function renderPosts() {
   container.innerHTML = posts
     .map(
       (p) => `
-    <div class="post-card">
+    <div class="post-card" id="profile-post-${p.id}">
       <div class="post-header">
         ${avatarHTML({ avatar_url: p.user_avatar, name: p.user_name })}
         <div class="post-user-info">
@@ -130,13 +131,86 @@ function renderPosts() {
         <div class="post-title">${p.title}</div>
         ${p.content ? `<div class="post-content">${p.content}</div>` : ""}
       </div>
-      ${p.image_url ? `<img src="${p.image_url}" class="post-image" alt="">` : ""}
-      <div class="post-footer">
-        ${isOwnProfile ? `<button class="post-action" onclick="deletePost(${p.id})"><i class="fa-solid fa-trash" style="color: rgb(45, 66, 54);"></i></button>` : ""}
+      ${p.image_url ? `<img src="${p.image_url}" class="post-image" alt="Imagen del post" data-image-url="${p.image_url}">` : ""}
+      <div class="post-actions">
+        <button type="button" class="post-action post-like-btn${p.likedByUser ? " liked" : ""}" data-post-id="${p.id}">
+          <i class="fa-solid fa-heart"></i> <span id="like-count-${p.id}">${p.likes || 0}</span>
+        </button>
+        <button type="button" class="post-action post-comment-toggle" data-post-id="${p.id}">
+          <i class="fa-solid fa-comment"></i> <span id="comment-count-${p.id}">${p.comments || 0}</span>
+        </button>
+        ${isOwnProfile ? `<button class="post-action" onclick="deletePost(${p.id})"><i class="fa-solid fa-trash" style="color: rgb(45, 66, 54);"></i> Eliminar</button>` : ""}
+      </div>
+      <div class="post-comments" id="comments-panel-${p.id}" style="display:none;">
+        <div class="comments-list" id="comments-list-${p.id}"></div>
+        <form class="post-comment-form" data-post-id="${p.id}">
+          <textarea name="comment" class="form-control" placeholder="Escribe un comentario..." required></textarea>
+          <button type="submit" class="btn btn-outline btn-sm">Comentar</button>
+        </form>
       </div>
     </div>`,
     )
     .join("");
+
+  posts.forEach((post) => {
+    loadPostInteractions(post.id, { silent: true }).catch(() => {});
+  });
+}
+
+function renderComment(comment) {
+  return `
+    <div class="comment-item">
+      ${avatarHTML({ avatar_url: comment.user_avatar, name: comment.user_name }, 28)}
+      <div class="comment-content">
+        <strong>${comment.user_name}</strong>
+        <div>${comment.content}</div>
+        <div class="comment-time">${timeAgo(comment.created_at)}</div>
+      </div>
+    </div>`;
+}
+
+async function loadPostInteractions(postId, options = {}) {
+  const { forceReload = false, silent = false } = options;
+  if (!forceReload && postInteractionsCache.has(postId)) {
+    const cached = postInteractionsCache.get(postId);
+    const likeCount = document.getElementById(`like-count-${postId}`);
+    const commentCount = document.getElementById(`comment-count-${postId}`);
+    const likeBtn = document.querySelector(`.post-like-btn[data-post-id="${postId}"]`);
+    const list = document.getElementById(`comments-list-${postId}`);
+    if (likeCount) likeCount.textContent = String(cached.likes ?? 0);
+    if (commentCount) commentCount.textContent = String((cached.comments || []).length);
+    if (likeBtn) likeBtn.classList.toggle("liked", Boolean(cached.likedByUser));
+    if (list) {
+      list.innerHTML = (cached.comments || []).map((c) => renderComment(c)).join("") || '<div class="comment-empty">Sé el primero en comentar.</div>';
+    }
+    return cached;
+  }
+
+  try {
+    const data = await api.getPostInteractions(postId);
+    const normalized = {
+      likes: Number(data.likes || 0),
+      likedByUser: Boolean(data.likedByUser),
+      comments: Array.isArray(data.comments) ? data.comments : [],
+    };
+    postInteractionsCache.set(postId, normalized);
+
+    const likeCount = document.getElementById(`like-count-${postId}`);
+    const commentCount = document.getElementById(`comment-count-${postId}`);
+    const likeBtn = document.querySelector(`.post-like-btn[data-post-id="${postId}"]`);
+    const list = document.getElementById(`comments-list-${postId}`);
+    if (likeCount) likeCount.textContent = String(normalized.likes);
+    if (commentCount) commentCount.textContent = String(normalized.comments.length);
+    if (likeBtn) likeBtn.classList.toggle("liked", normalized.likedByUser);
+    if (list) {
+      list.innerHTML = normalized.comments.map((c) => renderComment(c)).join("") || '<div class="comment-empty">Sé el primero en comentar.</div>';
+    }
+    return normalized;
+  } catch (err) {
+    console.error("Error cargando interacciones:", err);
+    if (!silent) showToast(err.message || "No se pudieron cargar los comentarios.", "error");
+    throw err;
+  }
 }
 
 function setupEventListeners() {
@@ -248,6 +322,155 @@ function setupEventListeners() {
     }
     window.location.href = `/messages.html?with=${profileUser.id}&name=${encodeURIComponent(profileUser.name)}`;
   });
+
+  const plantsGrid = document.getElementById("plants-grid");
+  if (plantsGrid) {
+    plantsGrid.addEventListener("click", (e) => {
+      const plantImage = e.target.closest(".plant-image");
+      if (plantImage) {
+        const imageUrl = plantImage.dataset.imageUrl;
+        if (imageUrl) {
+          const modal = document.getElementById("image-fullscreen-modal");
+          const image = document.getElementById("fullscreen-image");
+          if (modal && image) {
+            image.src = imageUrl;
+            modal.classList.add("open");
+          }
+        }
+      }
+    });
+  }
+
+  const postsContainer = document.getElementById("user-posts");
+  if (postsContainer) {
+    postsContainer.addEventListener("click", async (e) => {
+      const postImage = e.target.closest(".post-image");
+      const likeBtn = e.target.closest(".post-like-btn");
+      const commentToggle = e.target.closest(".post-comment-toggle");
+
+      if (postImage) {
+        const imageUrl = postImage.dataset.imageUrl;
+        if (imageUrl) {
+          const modal = document.getElementById("image-fullscreen-modal");
+          const image = document.getElementById("fullscreen-image");
+          if (modal && image) {
+            image.src = imageUrl;
+            modal.classList.add("open");
+          }
+        }
+        return;
+      }
+
+      if (likeBtn) {
+        const postId = likeBtn.dataset.postId;
+        if (!currentUser) {
+          window.location.href = "/login.html";
+          return;
+        }
+        try {
+          const result = await api.togglePostLike(postId);
+          const countEl = document.getElementById(`like-count-${postId}`);
+          const cached = postInteractionsCache.get(postId) || { likes: 0, likedByUser: false, comments: [] };
+          const nextLikes = Math.max(0, (cached.likes || 0) + (result.liked ? 1 : -1));
+          cached.likes = nextLikes;
+          cached.likedByUser = result.liked;
+          postInteractionsCache.set(postId, cached);
+
+          const current = parseInt(countEl?.textContent || "0", 10);
+          if (countEl) countEl.textContent = result.liked ? current + 1 : Math.max(current - 1, 0);
+          likeBtn.classList.toggle("liked", result.liked);
+        } catch (err) {
+          showToast(err.message, "error");
+        }
+        return;
+      }
+
+      if (commentToggle) {
+        const postId = commentToggle.dataset.postId;
+        const panel = document.getElementById(`comments-panel-${postId}`);
+        if (panel) {
+          panel.style.display = panel.style.display === "none" ? "block" : "none";
+          if (panel.style.display === "block") await loadPostInteractions(postId);
+        }
+      }
+    });
+
+    postsContainer.addEventListener("submit", async (e) => {
+      const form = e.target.closest(".post-comment-form");
+      if (!form) return;
+      e.preventDefault();
+      const postId = form.dataset.postId;
+      const textarea = form.querySelector('textarea[name="comment"]');
+      const content = textarea.value.trim();
+      if (!content) return;
+      if (!currentUser) {
+        window.location.href = "/login.html";
+        return;
+      }
+      const btn = form.querySelector("[type=submit]");
+      btn.disabled = true;
+      try {
+        const comment = await api.addPostComment(postId, content);
+        textarea.value = "";
+        const list = document.getElementById(`comments-list-${postId}`);
+        if (list) {
+          list.insertAdjacentHTML("beforeend", renderComment(comment));
+        }
+        const cached = postInteractionsCache.get(postId) || { likes: 0, likedByUser: false, comments: [] };
+        cached.comments = [...(cached.comments || []), comment];
+        postInteractionsCache.set(postId, cached);
+        const commentCount = document.getElementById(`comment-count-${postId}`);
+        if (commentCount) commentCount.textContent = String((cached.comments || []).length);
+        showToast("Comentario agregado");
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
+  const fullscreenModal = document.getElementById("image-fullscreen-modal");
+  const fullscreenImage = document.getElementById("fullscreen-image");
+  const closeBtn = document.getElementById("image-fullscreen-close");
+  const downloadBtn = document.getElementById("image-fullscreen-download");
+
+  if (fullscreenModal && closeBtn && downloadBtn) {
+    closeBtn.addEventListener("click", () => {
+      fullscreenModal.classList.remove("open");
+    });
+
+    fullscreenModal.addEventListener("click", (e) => {
+      if (e.target === fullscreenModal) {
+        fullscreenModal.classList.remove("open");
+      }
+    });
+
+    downloadBtn.addEventListener("click", async () => {
+      const imageUrl = fullscreenImage?.src;
+      if (!imageUrl) return;
+      try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `imagen-plantas-${Date.now()}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (err) {
+        showToast("Error al descargar la imagen", "error");
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && fullscreenModal.classList.contains("open")) {
+        fullscreenModal.classList.remove("open");
+      }
+    });
+  }
 
   // Close modals on overlay click
   document.querySelectorAll(".modal-overlay").forEach((overlay) => {

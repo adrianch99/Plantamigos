@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const { pool } = require('../db');
 const auth = require('../middleware/auth');
 
@@ -30,17 +31,38 @@ router.get('/:id', async (req, res) => {
     );
     if (!user.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado' });
 
+    let userId = null;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      try {
+        userId = jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET).id;
+      } catch {
+        userId = null;
+      }
+    }
+
     const plants = await pool.query(
       'SELECT * FROM user_plants WHERE user_id = $1 ORDER BY created_at DESC',
       [req.params.id]
     );
     const posts = await pool.query(
-      `SELECT p.*, u.name as user_name, u.avatar_url as user_avatar
-       FROM posts p JOIN users u ON u.id = p.user_id
-       WHERE p.user_id = $1 ORDER BY p.created_at DESC LIMIT 20`,
-      [req.params.id]
+      `SELECT p.*, u.name as user_name, u.avatar_url as user_avatar, u.city, u.neighborhood,
+        COALESCE(like_counts.count, 0) AS likes,
+        COALESCE(comment_counts.count, 0) AS comments`
+      + (userId ? ', CASE WHEN user_likes.user_id IS NOT NULL THEN true ELSE false END AS liked_by_user' : ', false AS liked_by_user') + `
+       FROM posts p
+       JOIN users u ON u.id = p.user_id
+       LEFT JOIN (
+         SELECT post_id, COUNT(*) AS count FROM post_likes GROUP BY post_id
+       ) AS like_counts ON like_counts.post_id = p.id
+       LEFT JOIN (
+         SELECT post_id, COUNT(*) AS count FROM post_comments GROUP BY post_id
+       ) AS comment_counts ON comment_counts.post_id = p.id
+       ${userId ? 'LEFT JOIN post_likes user_likes ON user_likes.post_id = p.id AND user_likes.user_id = $2' : ''}
+       WHERE p.user_id = $1
+       ORDER BY p.created_at DESC LIMIT 20`,
+      userId ? [req.params.id, userId] : [req.params.id]
     );
-    res.json({ ...user.rows[0], plants: plants.rows, posts: posts.rows });
+    res.json({ ...user.rows[0], plants: plants.rows, posts: posts.rows.map(row => ({ ...row, likedByUser: row.liked_by_user })) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
